@@ -1,10 +1,87 @@
-<HTML:5>
-
+<html>
     <head>
         <title>Mandelbrot Set</title>
     </head>
 
     <body>
-        <h1>Mandelbrot Set</h1><canvas id="mandelbrotCanvas" width="800" height="600"></canvas>
+        <h1>Mandelbrot Set</h1>
+
+        <div>
+            <label>Height:</label>
+            <input type="number" id="heightInput" value="600" min="1" step="1.00"/>
+            <label>Width:</label>
+            <input type="number" id="widthInput" value="800" min="1" step="1.00"/>
+            <label>Max Iterations:</label>
+            <input type="number" id="maxIterationsInput" value="100.00" min="1" step="1.00"/>
+            <button id="renderButton" onclick="startRendering()">Render</button>
+        </div>
+        <div>
+            <canvas id="mandelbrotCanvas" width="800" height="600"></canvas>
+        </div>
+        
+
+
+        <script src="worker.js"></script>
+
+        <script>
+            // Default values
+            var maxIterations = 100;
+            var height = 600;
+            var width = 800;
+            var xMin = -2;
+            var xMax = 1;
+            var yMin = -1.5;
+            var yMax = 1.5;
+            var pixelx = 0;
+            var pixely = 0;
+
+            // Initialize canvas and context
+            const canvas = document.getElementById('mandelbrotCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Get max iterations from input field
+            function getMaxIterations() {
+                const maxIterationsInput = document.getElementById('maxIterationsInput');
+                return parseInt(maxIterationsInput.value);
+            }
+
+            //get height from input field
+            function getHeight() {
+                const heightInput = document.getElementById('heightInput');
+                return parseInt(heightInput.value);
+            }
+
+            //get width from input field
+            function getWidth() {
+                const widthInput = document.getElementById('widthInput');
+                return parseInt(widthInput.value);
+            }
+
+            // Function to start rendering the Mandelbrot set
+            function startRendering() {
+                maxIterations = getMaxIterations();
+                height = getHeight();
+                width = getWidth();
+
+                // Update canvas size
+                canvas.width = width;
+                canvas.height = height;
+
+                // Render the Mandelbrot set
+                renderMandelbrotSet();
+            }
+
+            function renderMandelbrotSet() {
+
+                var worker = new Worker('worker.js');
+                console.log("Worker created");
+                worker.postMessage({ width: width, height: height, maxIterations: maxIterations,
+                    xMin: xMin, xMax: xMax, yMin: yMin, yMax: yMax, pixelx: pixelx, pixely: pixely
+                 });
+                console.log("Message sent");
+            }
+            
+        </script>
     </body>
-</HTML:5>
+</html>
+
