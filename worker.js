@@ -8,7 +8,7 @@ var yMax;
 var pixelx;
 var pixely;
 var boundary = 2;
-let colorArray = new Array();
+let colorArray;
 
 self.onmessage = function(event) {
     console.log("Worker received message");
@@ -24,6 +24,7 @@ self.onmessage = function(event) {
 
     console.log(width, height, maxIterations, xMin, xMax, yMin, yMax, pixelx, pixely );
     calculateCoordiates(xMin, xMax, yMin, yMax, pixelx, pixely, width, height);
+    createColorGradient();
 }
 
 
@@ -61,11 +62,38 @@ function getDistance(x1, y1){
 
 
 function createColorGradient(){
+    const colors = [];
     const steps = 255/3;
     let index = 0;
 
-    
-    
+    // red to green
+    for(var i = 0; i<= steps; i++){
+        let r = 255 - Math.round(i * (255 / steps));
+        let g = Math.round(i * (255 / steps));
+        colors.push(`rgb(${r}, ${g}, 0)`);
+        index++;
+    }
+
+    // green to blue
+    for(var i = 0; i<= steps; i++){
+        let g = 255 - Math.round(i * (255 / steps));
+        let b = Math.round(i * (255 / steps));
+        colors.push(`rgb(0, ${g}, ${b})`);
+        index++;
+    }
+
+    //blue to red
+    for(var i = 0; i<= steps; i++){
+        let b = 255 - Math.round(i * (255 / steps));
+        let r = Math.round(i * (255 / steps));
+        colors.push(`rgb(${r}, 0, ${b})`);
+        index++;
+    }
+    setColorinArray(colors);
+}
+
+function setColorinArray(colors){
+    colorArray = colors;
 }
 
 
