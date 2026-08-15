@@ -21,7 +21,6 @@
         
 
 
-        <script src="worker.js"></script>
 
         <script>
             // Default values
@@ -34,6 +33,8 @@
             var yMax = 1.5;
             var pixelx = 0;
             var pixely = 0;
+
+            let nextRow = 0;
 
             // Initialize canvas and context
             var canvas = document.getElementById('mandelbrotCanvas');
@@ -68,20 +69,54 @@
                 // Update canvas size
                 canvas.width = width;
                 canvas.height = height;
-                //imagedata = ctx.getImageData(0,0, canvas.width, canvas.height);
+                imagedata = ctx.getImageData(0,0, canvas.width, canvas.height);
                 // Render the Mandelbrot set
                 renderMandelbrotSet();
             }
 
             function renderMandelbrotSet() {
+                let maxWorkers = 6;
+                 nextRow = 0;
+                for (let i = 0; i < maxWorkers; i++) {
+                    const worker = new Worker("worker.js");
 
-                var worker = new Worker('worker.js');
-                console.log("Worker created");
-                worker.postMessage({ width: width, height: height, maxIterations: maxIterations,
-                    xMin: xMin, xMax: xMax, yMin: yMin, yMax: yMax,
-                    pixelx: pixelx, pixely: pixely
-                 });
+                    worker.onmessage = function(event) {
+                        const row = event.data.row;
+                        const colors = event.data.colors;
+
+                        for (let x = 0; x < colors.length; x++) {
+                            ctx.fillStyle = colors[x];
+                            ctx.fillRect(x, row, 1, 1);
+                        }
+
+                        assignNextRow(worker);
+                    };
+
+                    assignNextRow(worker);
+                }
+                
                 console.log("Message sent");
+
+                
+            }
+
+            function assignNextRow(worker) {
+                if (nextRow >= height) {
+                    return;
+                }
+
+                worker.postMessage({
+                    width: width,
+                    height: height,
+                    maxIterations: maxIterations,
+                    xMin: xMin,
+                    xMax: xMax,
+                    yMin: yMin,
+                    yMax: yMax,
+                    pixely: nextRow
+                });
+
+                nextRow++;
             }
             
         </script>

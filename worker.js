@@ -9,6 +9,7 @@ var pixelx;
 var pixely;
 var boundary = 2;
 let colorArray;
+let rowColors;
 
 self.onmessage = function(event) {
     console.log("Worker received message");
@@ -21,38 +22,62 @@ self.onmessage = function(event) {
     yMax = event.data.yMax;
     pixelx = event.data.pixelx;
     pixely = event.data.pixely;
-
-    console.log(width, height, maxIterations, xMin, xMax, yMin, yMax, pixelx, pixely );
-    calculateCoordiates(xMin, xMax, yMin, yMax, pixelx, pixely, width, height);
     createColorGradient();
+
+    //console.log(width, height, maxIterations, xMin, xMax, yMin, yMax, pixelx, pixely );
+    
+    const results = calculateCoordiates(xMin, xMax, yMin, yMax, pixelx, pixely, width, height);
+    const colors = getColorOfPixel(results);
+
+    self.postMessage({
+        row: pixely,
+        colors: colors
+    });
 }
 
 
 function calculateCoordiates(xMin, xMax, yMin, yMax, pixelx, pixely, width, height) {
-    var cx = xMin + (pixelx/width) * (xMax - xMin);
+    const results = [];
     var cy = yMax - (pixely/height)* (yMax - yMin);
 
-    startIterating(cx, cy);
+    for (let pixelx = 0; pixelx < width; pixelx++) {
 
-    console.log(cx, cy);
+        const cx =
+            xMin +
+            (pixelx / width) *
+            (xMax - xMin);
+
+        const iterations = startIterating(cx, cy);
+
+        results.push(iterations);
+        //console.log(cx, cy);
+    }
+
+    return results;
+    
 }
 
 
 function startIterating(cx, cy){
-    var x0 = 0;
-    var y0 = 0;
-    var x1 = Math.pow(x0, 2) - Math.pow(y0, 2) + cx;
-    var y1 = 2 * x0 * y0 + cy;
-    var i = 0;
+    let x = 0;
+    let y = 0;
 
-    while(i < boundary){
-        i = getDistance(x1, y1);
-        console.log(i);
-        var buffer = x1;
-        x1 = Math.pow(x1, 2) - Math.pow(y1, 2) + cx;
-        y1 = 2 * buffer * y1 + cy;
-        
+    for (let j = 0; j < maxIterations; j++) {
+
+        const newX = Math.pow(x, 2) - Math.pow(y, 2) + cx;
+        const newY = 2 * x * y + cy;
+
+        x = newX;
+        y = newY;
+
+        const distance = getDistance(x, y);
+
+        if (distance > boundary) {
+            return j + 1;
+        }
     }
+
+    return maxIterations;
 }
 
 function getDistance(x1, y1){
@@ -96,4 +121,15 @@ function setColorinArray(colors){
     colorArray = colors;
 }
 
-
+function getColorOfPixel(results){
+    rowColors = new Array(results.length);
+    for(let i = 0; i< results.length; i++){
+        if (results[i] === maxIterations) {
+            rowColors[i] = "rgb(0, 0, 0)";
+        }
+        else {
+            rowColors[i] = colorArray[results[i]];
+        }
+    }
+    return rowColors;
+}
