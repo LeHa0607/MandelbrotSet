@@ -8,6 +8,7 @@ var yMax;
 var pixelx;
 var pixely;
 var boundary = 2;
+let colorArray = new Array();
 
 self.onmessage = function(event) {
     console.log("Worker received message");
@@ -56,6 +57,15 @@ function startIterating(cx, cy){
 function getDistance(x1, y1){
     var a = Math.sqrt((Math.pow(x1, 2) + Math.pow(y1, 2)) );
     return a;
+}
+
+
+function createColorGradient(){
+    const steps = 255/3;
+    let index = 0;
+
+    
+    
 }
 
 

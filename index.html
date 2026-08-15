@@ -26,7 +26,7 @@
         <script>
             // Default values
             var maxIterations = 100;
-            var height = 600;
+            let height = 600;
             var width = 800;
             var xMin = -2;
             var xMax = 1;
@@ -36,8 +36,9 @@
             var pixely = 0;
 
             // Initialize canvas and context
-            const canvas = document.getElementById('mandelbrotCanvas');
+            var canvas = document.getElementById('mandelbrotCanvas');
             const ctx = canvas.getContext('2d');
+            var imagedata;
 
             // Get max iterations from input field
             function getMaxIterations() {
@@ -60,13 +61,13 @@
             // Function to start rendering the Mandelbrot set
             function startRendering() {
                 maxIterations = getMaxIterations();
-                height = getHeight();
                 width = getWidth();
+                height = width * 3/4; 
 
                 // Update canvas size
                 canvas.width = width;
                 canvas.height = height;
-
+                imagedata = ctx.getImageData(0,0, canvas.width, canvas.height);
                 // Render the Mandelbrot set
                 renderMandelbrotSet();
             }
@@ -76,7 +77,8 @@
                 var worker = new Worker('worker.js');
                 console.log("Worker created");
                 worker.postMessage({ width: width, height: height, maxIterations: maxIterations,
-                    xMin: xMin, xMax: xMax, yMin: yMin, yMax: yMax, pixelx: pixelx, pixely: pixely
+                    xMin: xMin, xMax: xMax, yMin: yMin, yMax: yMax,
+                    pixelx: pixelx, pixely: pixely
                  });
                 console.log("Message sent");
             }
