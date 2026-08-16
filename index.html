@@ -20,8 +20,6 @@
         </div>
         
 
-
-
         <script>
             // Default values
             var maxIterations = 100;
@@ -34,11 +32,14 @@
             var pixelx = 0;
             var pixely = 0;
 
+            // Variable to keep track of the next row to be rendered
             let nextRow = 0;
 
             // Initialize canvas and context
             var canvas = document.getElementById('mandelbrotCanvas');
+            // Get the 2D rendering context
             const ctx = canvas.getContext('2d');
+            // Variable to store the image data
             var imagedata;
 
             // Get max iterations from input field
@@ -64,22 +65,29 @@
                 maxIterations = getMaxIterations();
 
                 width = getWidth();
-                height = getHeight(); 
+                height = width * 0.75; 
 
                 // Update canvas size
                 canvas.width = width;
                 canvas.height = height;
+
+                // Get the image data for the canvas
                 imagedata = ctx.getImageData(0,0, canvas.width, canvas.height);
+
                 // Render the Mandelbrot set
                 renderMandelbrotSet();
             }
-
+            
+            // Function to render the Mandelbrot set using Web Workers
             function renderMandelbrotSet() {
                 let maxWorkers = 6;
-                 nextRow = 0;
+                nextRow = 0;
+
                 for (let i = 0; i < maxWorkers; i++) {
+                    // Create a new worker
                     const worker = new Worker("worker.js");
 
+                    // Listen for messages from the worker
                     worker.onmessage = function(event) {
                         const row = event.data.row;
                         const colors = event.data.colors;
@@ -94,17 +102,17 @@
 
                     assignNextRow(worker);
                 }
-                
-                console.log("Message sent");
-
-                
+                //-- console.log("Message sent");
             }
 
+            // Function to assign the next row to a worker
             function assignNextRow(worker) {
+                // Check if there are more rows to render
                 if (nextRow >= height) {
                     return;
                 }
-
+                
+                // Send the next row to the worker
                 worker.postMessage({
                     width: width,
                     height: height,
