@@ -31,6 +31,7 @@
             var yMax = 1.5;
             var pixelx = 0;
             var pixely = 0;
+            let workers = [];
 
             // Variable to keep track of the next row to be rendered
             let nextRow = 0;
@@ -80,6 +81,11 @@
             
             // Function to render the Mandelbrot set using Web Workers
             function renderMandelbrotSet() {
+                for (const worker of workers) {
+                    worker.terminate();
+                }
+
+                workers = [];
                 let maxWorkers = 6;
                 nextRow = 0;
 
@@ -127,6 +133,31 @@
                 nextRow++;
             }
             
+
+            canvas.addEventListener('click', function(event) {
+                const rect = canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+
+                const xRange = xMax - xMin;
+                const yRange = yMax - yMin;
+
+                const centerY =yMax -(y / height) * yRange;
+                const centerX =xMin +(x / width) * xRange;
+
+                const newXMin = centerX - xRange / 4;
+                const newXMax = centerX + xRange / 4;
+
+                const newYMin = centerY - yRange / 4;
+                const newYMax = centerY + yRange / 4;
+
+                xMin = newXMin;
+                xMax = newXMax;
+                yMin = newYMin;
+                yMax = newYMax;
+
+                startRendering();
+            });
         </script>
     </body>
 </html>

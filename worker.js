@@ -94,7 +94,7 @@ function getDistance(x1, y1){
 function createColorGradient(){
     const colors = [];
     // calculate the number of steps for each color transition
-    const steps = 255/3;
+    const steps = 255;
     let index = 0;
 
     // red to green
@@ -144,7 +144,11 @@ function getColorOfPixel(results){
         }
         // otherwise, set the color to the corresponding color in the color array
         else {
-            rowColors[i] = colorArray[results[i]];
+            const colorIndex = Math.floor(
+                (Math.log(results[i]) / Math.log(maxIterations)) *
+                (colorArray.length - 1)
+            )
+            rowColors[i] = colorArray[colorIndex];
         }
     }
     return rowColors;
